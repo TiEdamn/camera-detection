@@ -1,15 +1,5 @@
-#video,
-#canvas,
-#area {
-    position: fixed;
-    top: 0;
-    left: 0;
-}
-
-.loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    opacity: 0.2;
-    background-color: #ffffff;
+html,
+body {
+    margin: 0;
+    padding: 0;
 }
