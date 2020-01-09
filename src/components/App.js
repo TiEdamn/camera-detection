@@ -14,8 +14,8 @@ class App extends Component {
                 audio: false,
                 video: {
                     facingMode: 'user',
-                    width: 600,
-                    height: 500
+                    width: 1000,
+                    height: 600
                 }
             })
             .then(stream => {
@@ -89,8 +89,9 @@ class App extends Component {
     render() {
         return (
             <div>
-                <video id="video" width="600" height="500" />
-                <canvas id="canvas" width="600" height="500" />
+                <video id="video" width="1000" height="600" />
+                <canvas id="canvas" width="1000" height="600" />
+                <canvas id="area" width="1000" height="600" />
             </div>
         );
     }
