@@ -19,10 +19,10 @@ export default (state = initialState, action) => {
         case ADD_COORDINATES:
             return {
                 ...state,
-                coordinates: [...state.coordinates, action.payload.coordinate]
+                coordinates: [...state.coordinates, action.payload]
             };
         case RESET_COORDINATES:
-            return !state.status
+            return state.status
                 ? state
                 : {
                       ...state,

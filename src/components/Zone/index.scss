@@ -1,6 +1,7 @@
 #zone {
     position: fixed;
-    top: 0;
+    top: 20px;
     left: 0;
     border: 1px dashed;
+    z-index: 2;
 }
