@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs';
@@ -9,7 +10,11 @@ import './index.scss';
 
 class Video extends Component {
     componentDidMount() {
-        const video = document.getElementById('video');
+        this.startVideo();
+    }
+
+    startVideo = () => {
+        const video = this.refs.video;
         const webCamPromise = navigator.mediaDevices
             .getUserMedia({
                 audio: false,
@@ -30,22 +35,52 @@ class Video extends Component {
             });
         const modelPromise = cocoSsd.load();
         Promise.all([modelPromise, webCamPromise]).then(values => {
-            this.detectFrame(video, values[0]);
-        });
-    }
-
-    detectFrame = (video, model) => {
-        model.detect(video).then(predictions => {
-            this.renderPredictions(predictions);
-            requestAnimationFrame(() => {
-                this.detectFrame(video, model);
-            });
+            this.cropFrame(video, values[0]);
         });
     };
 
+    cropFrame = (video, model) => {
+        const { coordinates } = this.props;
+
+        const canvas = this.refs.crop;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, config.width, config.height);
+
+        if (coordinates.length > 0) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(coordinates[0].x, coordinates[0].y);
+            coordinates.map(item => ctx.lineTo(item.x, item.y));
+            ctx.lineWidth = 1;
+            ctx.clip();
+        }
+
+        ctx.drawImage(video, 0, 0);
+
+        ctx.restore();
+
+        this.detectFrame(canvas, model);
+
+        requestAnimationFrame(() => {
+            this.cropFrame(video, model);
+        });
+    };
+
+    detectFrame = (video, model) => {
+        const { status } = this.props;
+
+        if (status) {
+            model.detect(video).then(predictions => {
+                this.renderPredictions(predictions);
+            });
+        } else {
+            const ctx = this.refs.predict.getContext('2d');
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        }
+    };
+
     renderPredictions = predictions => {
-        const c = document.getElementById('canvas');
-        const ctx = c.getContext('2d');
+        const ctx = this.refs.predict.getContext('2d');
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // Font options.
         const font = '16px sans-serif';
@@ -90,9 +125,21 @@ class Video extends Component {
     render() {
         return (
             <React.Fragment>
-                <video id="video" width={config.width} height={config.height} />
+                <video
+                    id="video"
+                    ref="video"
+                    width={config.width}
+                    height={config.height}
+                />
                 <canvas
-                    id="canvas"
+                    id="predict"
+                    ref="predict"
+                    width={config.width}
+                    height={config.height}
+                />
+                <canvas
+                    id="crop"
+                    ref="crop"
                     width={config.width}
                     height={config.height}
                 />
@@ -101,4 +148,9 @@ class Video extends Component {
     }
 }
 
-export default Video;
+const mapStateToProps = state => ({
+    status: state.app.status,
+    coordinates: state.app.coordinates
+});
+
+export default connect(mapStateToProps)(Video);
