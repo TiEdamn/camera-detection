@@ -56,7 +56,6 @@ class Video extends Component {
         }
 
         ctx.drawImage(video, 0, 0);
-
         ctx.restore();
 
         this.detectFrame(canvas, model);
